@@ -66,7 +66,9 @@ module Unread
             rm.timestamp     = Time.current
           end
         end.tap do |rm|
-          ReadMark.where(:readable_type => self.base_class.name, :reader_id => reader.id, :reader_type => reader.class.base_class.name).where("id < ?", rm.id).delete_all
+          ReadMark.where(:readable_type => self.base_class.name, :reader_id => reader.id, :reader_type => reader.class.base_class.name).map(&:id).tap do |rm_ids|
+            ReadMark.delete_all(id: rm_ids)
+          end
         end
 
         reader.forget_memoized_read_mark_global
